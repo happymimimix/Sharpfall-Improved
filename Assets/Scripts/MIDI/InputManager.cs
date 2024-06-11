@@ -24,7 +24,9 @@ public static class InputManager
             switch (type)
             {
                 case 0x90:
-                    NoteManager.Submit(data1, 0, 0);
+                    if(data2 != 0) {
+                        NoteManager.Submit(data1, 0, 0);
+                    }
                     break;
                 case 0xB0:
                     ControlPointer.SubmitControl(data1, data2);
