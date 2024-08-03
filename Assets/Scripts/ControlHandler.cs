@@ -139,7 +139,7 @@ public class ControlHandler : MonoBehaviour
             {
                 Sound.Submit((0x80 | (i << 8) | (0 << 16)));
             }
-        } else if(value == 64)
+        } else if(value == 64 || value == 127)
         {
             for (int i = 0; i < 128; i++)
             {
@@ -151,7 +151,7 @@ public class ControlHandler : MonoBehaviour
 
     static void RemoveAllKeys(int value)
     {
-        if (value == 64)
+        if (value == 64 || value == 127)
         {
             NoteManager.ClearEntities();
         }
