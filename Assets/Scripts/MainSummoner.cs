@@ -20,7 +20,7 @@ public struct Note
 public static class NoteManager
 {
     public static List<Note> notes = new List<Note>();
-    public static int[] keysHit = new int[128];
+    public static int[] keysHit = new int[256];
     public static int KNLPF = 1;
     public static bool firstrun = true;
     public static long totalSpawns = 0;
@@ -61,7 +61,7 @@ public static class NoteManager
     }
     public static void ResetKeysHit()
     {
-        for(int i = 0; i < 128; i++)
+        for(int i = 0; i < 256; i++)
         {
             keysHit[i] = 0;
         }
