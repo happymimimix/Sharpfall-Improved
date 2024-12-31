@@ -196,7 +196,7 @@ public class UIHandler : MonoBehaviour
         }
         NoteManager.ClearEntities();
         MIDIClock.render = false;
-        Time.maximumDeltaTime = 0.0f;
+        Time.maximumDeltaTime = (float)(1.0d/3.0d);
         NoteManager.maxBlocks = 1<<10;
         NoteManager.KNLPF = 1;
         GameObject CenterCam = GameManager.instance.CenterCam;
