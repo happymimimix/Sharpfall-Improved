@@ -14,7 +14,7 @@ public unsafe partial struct PhysUpdate : ISystem
             var physicsStep = SystemAPI.GetSingletonRW<PhysicsStep>();
             physicsStep.ValueRW.Gravity = new float3(gm.gravityX, gm.gravityY, gm.gravityZ);
             physicsStep.ValueRW.SolverIterationCount = gm.solverIterations;
-            physicsStep.ValueRW.SimulationType = (SimulationType)gm.simulationType;
+            physicsStep.ValueRW.SimulationType = SimulationType.HavokPhysics;
         }
     }
 }

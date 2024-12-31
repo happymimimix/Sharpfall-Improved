@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using TMPro;
 using UnityEngine;
+using System.Collections;
 
 public class ControlHandler : MonoBehaviour
 {
@@ -14,12 +15,13 @@ public class ControlHandler : MonoBehaviour
     private ControlFunction[] functions =
     {
         OnFloorX,
-        OnFloorHeight,
+        OnFloorY,
         OnFloorZ,
         OnFloorRotationX,
+        OnFloorRotationY,
         OnFloorRotationZ,
-        OnGravity,
         OnGravityX,
+        OnGravityY,
         OnGravityZ,
         PressAllKeys,
         RemoveAllKeys
@@ -45,7 +47,7 @@ public class ControlHandler : MonoBehaviour
                 idx++;
                 listeners[idx] = i - 1;
             }
-            GameManager.instance.inputFields[17].GetComponent<TMP_InputField>().text = listeners[0] == -1 ? "" : listeners[0].ToString();
+            GameManager.instance.inputFields[17].GetComponent<TMP_InputField>().text = listeners[0].ToString();
         }
     }
 
@@ -66,20 +68,21 @@ public class ControlHandler : MonoBehaviour
         }
     }
 
-    public static float floorPosX = -0.5f;
-    public static float floorPosY = -5f;
+    public static float floorPosX = 0f;
+    public static float floorPosY = -15f;
     public static float floorPosZ = 0f;
     public static float floorRotX = 0f;
+    public static float floorRotY = 0f;
     public static float floorRotZ = 0f;
 
     static void OnFloorX(int value)
     {
-        floorPosX = (value - 64) / 3f - 0.5f;
+        floorPosX = (value - 64) / 3f;
     }
 
-    static void OnFloorHeight(int value)
+    static void OnFloorY(int value)
     {
-        floorPosY = (value - 64) / 10f - 5f;
+        floorPosY = (value - 64) / 10f - 15f;
     }
 
     static void OnFloorZ(int value)
@@ -100,6 +103,19 @@ public class ControlHandler : MonoBehaviour
         }
     }
 
+    static void OnFloorRotationY(int value)
+    {
+        if (value == 64)
+        {
+            floorRotY = 0;
+        }
+        else
+        {
+            floorRotY = value - 64;
+            floorRotY = -(floorRotY + 0.5f) / 63.5f * 90;
+        }
+    }
+
     static void OnFloorRotationZ(int value)
     {
         if (value == 64)
@@ -113,51 +129,51 @@ public class ControlHandler : MonoBehaviour
         }
     }
 
-    static void OnGravity(int value)
-    {
-        float result = value == 64 ? 9.80665f : (value / 127f) * 9.80665f * 2f - 9.80665f;
-        GameManager.instance.configuration["gravity"] = result;
-    }
-
     static void OnGravityX(int value)
     {
-        float result = value == 64 ? 0 : (value / 127f - 0.5f) * 4f * 9.80665f;
+        float result = value == 64 ? 0 : (value / 127f - 0.5f) * 8f;
         GameManager.instance.configuration["gravityX"] = result;
+    }
+
+    static void OnGravityY(int value)
+    {
+        float result = value == 64 ? 8f : (value / 127f - 0.5f) * 8f;
+        GameManager.instance.configuration["gravityY"] = result;
     }
 
     static void OnGravityZ(int value)
     {
-        float result = value == 64 ? 0 : (value / 127f - 0.5f) * 4f * 9.80665f;
+        float result = value == 64 ? 0 : (value / 127f - 0.5f) * 8f;
         GameManager.instance.configuration["gravityZ"] = result;
     }
 
     static void PressAllKeys(int value)
     {
-        if(value == 0)
-        {
-            for (int i = 0; i < 128; i++)
-            {
-                Sound.Submit((0x80 | (i << 8) | (0 << 16)));
-            }
-        } else if(value == 64 || value == 127)
+        if(value >= 64)
         {
             for (int i = 0; i < 128; i++)
             {
                 Sound.Submit((0x90 | (i << 8) | (100 << 16)));
                 NoteManager.Submit((byte)i, 0, 0);
             }
+        } else
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                Sound.Submit((0x80 | (i << 8) | (0 << 16)));
+            }
         }
     }
 
     static void RemoveAllKeys(int value)
     {
-        if (value == 64 || value == 127)
+        if (value >= 64)
         {
             NoteManager.ClearEntities();
         }
     }
 
-    void Start()
+    IEnumerator Start()
     {
         if (instance != null)
         {
@@ -167,6 +183,7 @@ public class ControlHandler : MonoBehaviour
         {
             instance = this;
         }
+        yield return new WaitForEndOfFrame();
         LoadListeners();
     }
 

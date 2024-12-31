@@ -15,6 +15,5 @@ public class Main : MonoBehaviour
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
         Time.fixedDeltaTime = 1f / 60f;
-        //Time.maximumDeltaTime = Time.fixedDeltaTime;
     }
 }

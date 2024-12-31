@@ -23,8 +23,9 @@ public static class NoteManager
     public static int[] keysHit = new int[256];
     public static int KNLPF = 1;
     public static bool firstrun = true;
+    public static long receivedNotes = 0;
     public static long totalSpawns = 0;
-    public static int maxBlocks = 2500;
+    public static int maxBlocks = 1<<10;
     public static long submitsThisFrame = 0;
     public static bool clearRequested = false;
     public static List<Entity> entities = new List<Entity>();
@@ -54,6 +55,7 @@ public static class NoteManager
             }
             submitsThisFrame++;
         }
+        NoteManager.receivedNotes++;
     }
     public static void ClearEntities()
     {
@@ -73,7 +75,7 @@ public static class PFAColors
     public static bool Ready = false;
     public static Color[] trackColors;
     public static Color[] PFAConfig;
-    public static void Init(int tracks)
+    public static void Init(ushort tracks)
     {
         PFAConfig = new Color[0];
         string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Piano From Above\\Config.xml";
@@ -82,7 +84,7 @@ public static class PFAColors
             try
             {
                 XDocument doc = XDocument.Parse(File.ReadAllText(path));
-                var colors = doc.Element("PianoFromAbove").Element("Visual").Element("Colors");
+                var colors = doc.Element("PFX").Element("Visual").Element("Colors");
                 List<Color> colorsList = new List<Color>();
                 foreach (var color in colors.Elements("Color"))
                 {
@@ -90,7 +92,7 @@ public static class PFAColors
                         Convert.ToByte(color.Attribute("R").Value),
                         Convert.ToByte(color.Attribute("G").Value),
                         Convert.ToByte(color.Attribute("B").Value),
-                        255
+                        Convert.ToByte(color.Attribute("A").Value)
                     ));
                 }
                 PFAConfig = colorsList.ToArray();
@@ -109,7 +111,7 @@ public static class PFAColors
         GameManager.instance.configuration["colorLoop"] = (bool)GameManager.instance.configuration["colorLoop"] && PFAConfig.Length > 0;
         GameManager.instance.inputFields[14].SetActive(PFAConfig.Length == 0);
         if (!(bool)GameManager.instance.configuration["colorLoop"] || PFAConfig.Length == 0) {
-            for (int i = 0; i < tracks; i++)
+            for (ushort i = 0; i <= tracks-1; i++)
             {
                 if (i < PFAConfig.Length)
                 {
@@ -121,7 +123,7 @@ public static class PFAColors
             }
         } else
         {
-            for (int i = 0; i < tracks; i++)
+            for (ushort i = 0; i <= tracks-1; i++)
             {
                 trackColors[i] = PFAConfig[i % PFAConfig.Length];
             }
@@ -163,7 +165,7 @@ public unsafe partial struct MainSummoner : ISystem
 
         LocalTransform pt = _entitymanager.GetComponentData<LocalTransform>(NoteManager.platform);
         pt.Position = new float3(ControlHandler.floorPosX, ControlHandler.floorPosY, ControlHandler.floorPosZ);
-        pt.Rotation = Quaternion.Euler(ControlHandler.floorRotX, 0f, ControlHandler.floorRotZ);
+        pt.Rotation = Quaternion.Euler(ControlHandler.floorRotX, ControlHandler.floorRotY, ControlHandler.floorRotZ);
         _entitymanager.SetComponentData(NoteManager.platform, pt);
 
         int total = NoteManager.notes.Count - NoteManager.maxBlocks;
@@ -177,6 +179,7 @@ public unsafe partial struct MainSummoner : ISystem
             }
             NoteManager.entities.Clear();
             NoteManager.totalSpawns = 0;
+            NoteManager.receivedNotes = 0;
         }
         Note[] safeCopy = new Note[NoteManager.notes.Count];
         NoteManager.notes.CopyTo(safeCopy);

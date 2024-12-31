@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Burst;
 using UnityEngine;
+using UnityEngine.UI;
 
 [BurstCompile]
 public class MIDIPlayer : MonoBehaviour
@@ -19,6 +20,12 @@ public class MIDIPlayer : MonoBehaviour
     static int[] currentEvent;
     static bool[] tempstep;
     static int[] pushback;
+    public Text TimeText;
+    public Text BPMText;
+    public Text SpawnedNotesText;
+    public Text BlocksQueueText;
+    public Text FPSText;
+    double lastTime = 0d;
     public static int parallelThreads = 1;
     static IEnumerator<byte>[] trackReads;
     static uint aliveCount = 0;
@@ -402,6 +409,30 @@ public class MIDIPlayer : MonoBehaviour
                 Application.Quit();
             }
         }
-        //NoteMan.SpawnUpdate();
+
+        try
+        {
+            FPSText.text = "FPS: " + ((ushort)((1d / (Time.realtimeSinceStartupAsDouble - lastTime)) * 100d)) / 100d;
+            SpawnedNotesText.text = "Spawned Notes: " + NoteManager.totalSpawns + " / " + NoteManager.receivedNotes;
+            BlocksQueueText.text = "Blocks Queue: " + NoteManager.totalSpawns % NoteManager.maxBlocks + " / " + System.Math.Min(NoteManager.totalSpawns, NoteManager.maxBlocks);
+            BPMText.text = "BPM: " + ((uint)(MIDIClock.bpm * 100d)) / 100d;
+            float secs = (float)(Time.realtimeSinceStartupAsDouble - MIDIClock.lastReset);
+            float mins = secs / 60;
+            secs = (mins - Mathf.Floor(mins)) * 60;
+            float hrs = mins / 60;
+            mins = (hrs - Mathf.Floor(hrs)) * 60;
+            string hourstring = Mathf.Floor(hrs).ToString();
+            string minstring = Mathf.Floor(mins).ToString();
+            string secstring = Mathf.Floor(secs).ToString();
+            if (hourstring.Length == 1) { hourstring = "0" + hourstring; }
+            if (minstring.Length == 1) { minstring = "0" + minstring; }
+            if (secstring.Length == 1) { secstring = "0" + secstring; }
+            TimeText.text = "Time Elapsed: " + hourstring + ":" + minstring + ":" + secstring;
+        }
+        catch (System.Exception)
+        {
+            // Ignore
+        }
+        lastTime = Time.realtimeSinceStartupAsDouble;
     }
 }

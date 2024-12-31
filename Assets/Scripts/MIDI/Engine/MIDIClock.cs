@@ -13,6 +13,7 @@ class MIDIClock
     public static bool throttle = true;
     public static double timeLost = 0;
     public static double startTime = 0;
+    public static double lastReset = 0;
     public static double renLast = 0;
     public static void Start(float offset = 0f)
     {
@@ -24,6 +25,7 @@ class MIDIClock
         ticklen = ((double)1 / (double)cppq) * ((double)60 / bpm);
         timee = -3d + ((double)offset);
         timee /= ticklen;
+        lastReset = Time.realtimeSinceStartupAsDouble;
     }
     public static void Reset()
     {
@@ -34,6 +36,7 @@ class MIDIClock
         renLast = 0;
         ticklen = ((double)1 / (double)cppq) * ((double)60 / bpm);
         timee = 0d;
+        lastReset = Time.realtimeSinceStartupAsDouble;
     }
     public static double GetPassedTime()
     {

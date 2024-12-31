@@ -52,7 +52,6 @@ public class UIHandler : MonoBehaviour
                     CenterCam.GetComponent<RotateCam>().enabled = false;
                     CenterCam.transform.rotation = Quaternion.Euler(0, 0, 0);
                     GameManager.instance.container.SetActive(false);
-                    Camera.main.GetComponent<CameraScript>().enabled = true;
                     if (GameManager.instance.selectedMidiPath != "N/A")
                     {
                         MIDI.PreloadPath(GameManager.instance.selectedMidiPath);
@@ -116,14 +115,14 @@ public class UIHandler : MonoBehaviour
     {
         foreach (GameObject i in menus)
         {
-            i.SetActive(i.name == name || (i.name == "RenderConfig" && (bool)GameManager.instance.configuration["render"]));
+            i.SetActive(i.name == name);
         }
     }
 
     public void UpdateControlInput()
     {
         int id = res[15].GetComponent<TMP_Dropdown>().value;
-        GameManager.instance.inputFields[17].GetComponent<TMP_InputField>().text = ControlHandler.listeners[id] == -1 ? "" : ControlHandler.listeners[id].ToString();
+        GameManager.instance.inputFields[17].GetComponent<TMP_InputField>().text = ControlHandler.listeners[id].ToString();
     }
 
     private void HandleIntegerInput(string config, string input, GameObject inputBox)
@@ -157,16 +156,11 @@ public class UIHandler : MonoBehaviour
     public void WriteSVX(string input) { HandleSingleInput("spawnVelX", input, GameManager.instance.inputFields[2]); }
     public void WriteSVY(string input) { HandleSingleInput("spawnVelY", input, GameManager.instance.inputFields[3]); }
     public void WriteSVZ(string input) { HandleSingleInput("spawnVelZ", input, GameManager.instance.inputFields[4]); }
-    public void WriteGrav(string input) { HandleSingleInput("gravity", input, GameManager.instance.inputFields[5]); }
+    public void WriteGrav(string input) { HandleSingleInput("gravityY", input, GameManager.instance.inputFields[5]); }
     public void WriteIter(string input) { HandleIntegerInput("SolverIter", input, GameManager.instance.inputFields[6]); }
-    public void WriteRender(bool input) { GameManager.instance.configuration["render"] = input; menus[2].SetActive(input); }
+    public void WriteRender(bool input) { GameManager.instance.configuration["render"] = input;}
     public void WriteDT(bool input) { GameManager.instance.configuration["followDelta"] = GameManager.instance.inputFields[18].GetComponent<Toggle>().isOn; }
     public void WriteLoop(bool input) { GameManager.instance.configuration["colorLoop"] = input; if ((int)GameManager.instance.configuration["colorMode"] == 2) { PFAColors.Init(MIDI.realTracks); } }
-    public void WriteSimul(int input) { GameManager.instance.configuration["simulationType"] = GameManager.instance.inputFields[7].GetComponent<TMP_Dropdown>().value; }
-    public void WritePreset(int input) { GameManager.instance.configuration["ffmpegPreset"] = GameManager.instance.inputFields[8].GetComponent<TMP_Dropdown>().value; }
-    public void WriteCRF(string input) { HandleIntegerInput("ffmpegCRF", input, GameManager.instance.inputFields[9]); }
-    public void WriteResX(string input) { HandleIntegerInput("renderResX", input, GameManager.instance.inputFields[10]); }
-    public void WriteResY(string input) { HandleIntegerInput("renderResY", input, GameManager.instance.inputFields[11]); }
     public void WriteFPS(string input) { HandleIntegerInput("renderFPS", input, GameManager.instance.inputFields[15]); }
     public void WriteControl(string input) {
         int test = -1;
@@ -202,15 +196,13 @@ public class UIHandler : MonoBehaviour
         }
         NoteManager.ClearEntities();
         MIDIClock.render = false;
-        Time.maximumDeltaTime = 0.333333333f;
-        NoteManager.maxBlocks = 2500;
+        Time.maximumDeltaTime = 0.0f;
+        NoteManager.maxBlocks = 1<<10;
         NoteManager.KNLPF = 1;
         GameObject CenterCam = GameManager.instance.CenterCam;
         CenterCam.GetComponent<RotateCam>().enabled = true;
         CenterCam.transform.rotation = Quaternion.Euler(0, 0, 0);
         GameManager.instance.container.SetActive(true);
-        Camera.main.GetComponent<CameraScript>().enabled = false;
-        Camera.main.transform.localPosition = new Vector3(-0.5f, 6.52f, -7.99f);
         MIDI.PreloadPath(Application.streamingAssetsPath + "\\Menu.mid");
         MIDIPlayer.Play(4f);
         if((int)GameManager.instance.configuration["colorMode"] == 2)
